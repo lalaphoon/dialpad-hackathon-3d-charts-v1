@@ -7,7 +7,7 @@ require("three/examples/js/controls/OrbitControls");
 const canvasSketch = require("canvas-sketch");
 const DISTANCE = 2;
 const ORIGIN = new THREE.Vector3(0, 0, 0);
-const AXIS_MATEGIAL = new THREE.LineBasicMaterial({
+const AXIS_MATERIAL = new THREE.LineBasicMaterial({
   color: 0x0000ff
 });
 
@@ -70,7 +70,7 @@ let drawAxis = (scene, v_max, h_max) => {
   points.push([tempOrigin, vPoint]);
   points.push([tempOrigin, hPoint]);
 
-  const lines = createLines(points, AXIS_MATEGIAL);
+  const lines = createLines(points, AXIS_MATERIAL);
   for (let i = 0 ; i < lines.length; i++){
     scene.add(lines[i]);
   }
