@@ -12,7 +12,7 @@ const DISTANCE = 2;
 const ORIGIN = new THREE.Vector3(0, 0, 0);
 const AXIS_DISTANCE = new THREE.Vector3(0, 0, 0);
 const AXIS_MATERIAL = new THREE.LineBasicMaterial({
-  color: 0x19e6e6
+  color: 0x000000
 });
 
 const settings = {
@@ -122,8 +122,9 @@ let createCube = (height=1) => {
   const geometry = new THREE.BoxGeometry(1, height, 1);
 
   // Setup a material
-  const material = new THREE.MeshBasicMaterial({
-    color: "pink"
+  const material = new THREE.MeshPhongMaterial({
+    color: "pink",
+    flatShading: true,
     // wireframe: true
   });
 
@@ -180,7 +181,7 @@ let drawBarChart = (scene, data=[]) => {
 let createText = (scene) => {
   const loader = new THREE.FontLoader();
   loader.load( 'node_modules/three/examples/fonts/helvetiker_bold.typeface.json', function ( font ) {
-    const geometry = new THREE.TextGeometry( 'o', {
+    const geometry = new THREE.TextGeometry( 'Monica', {
         font: font,
         size: 1,
         height: 1,
@@ -196,8 +197,12 @@ let createText = (scene) => {
 
       var mesh = new THREE.Mesh( geometry, textMaterial );
       mesh.position.set( 0, 0, 4 );
+
+      var mesh2 = new THREE.Mesh( geometry, textMaterial );
+      mesh2.position.set( 0, 0, 8 );
     
       scene.add(mesh);
+      scene.add(mesh2);
     
   });
 }
@@ -213,7 +218,7 @@ const sketch = ({ context }) => {
   });
 
   // WebGL background color
-  renderer.setClearColor("#000", 1);
+  renderer.setClearColor("#fff", 1);
 
   // Setup a camera
   const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 100);
@@ -231,8 +236,17 @@ const sketch = ({ context }) => {
   scene.add( axesHelper );
 
 
-  const light = new THREE.AmbientLight( 0x404040, 6 ); // soft white light
+  //================================================
+  // Stage 0.1: Set up lights
+  //================================================
+
+  const light = new THREE.AmbientLight( 0x404040, 2 ); // soft white light
   scene.add( light );
+
+  const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+  directionalLight.position.set(0,10,10);
+  scene.add( directionalLight );
+
 
 
   //================================================
@@ -246,20 +260,13 @@ const sketch = ({ context }) => {
   scene.add(new THREE.GridHelper(gridScale, 10, "hsl(0, 0%, 50%)", "hsl(0, 0%, 70%)"));
 
  
-  
 
+  createText(scene);
 
- createText(scene);
-
-  
-  
-  
-  
-  
   
   //===================================================
   // State 3: draw each frame
-  //==================================================
+  //=================================================
   return {
     // Handle resize events here
     resize({ pixelRatio, viewportWidth, viewportHeight }) {
