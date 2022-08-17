@@ -257,7 +257,7 @@ let drawBarChart = (scene, data=[], starting_z=0) => {
 
 let drawMultiBarChart = (scene, data=[]) => {
   const min_data = 1; // We will recalculate this
-  const max_data = 23;//getMax(data); // we will recalculate this
+  const max_data = getMax(data[0]); // we will recalculate this
   drawGridAxis(scene, max_data, data[0].length);
 
   for(let i = 0; i < 5; i++){
