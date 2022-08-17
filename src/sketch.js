@@ -8,12 +8,39 @@ require("three/examples/js/geometries/TextGeometry");
 
 const canvasSketch = require("canvas-sketch");
 
-const DISTANCE = 2;
+const DISTANCE = 1.1;
 const ORIGIN = new THREE.Vector3(0, 0, 0);
 const AXIS_DISTANCE = new THREE.Vector3(0, 0, 0);
 const AXIS_MATERIAL = new THREE.LineBasicMaterial({
   color: 0x000000
 });
+const BAR_MATERIAL = {
+    0: new THREE.MeshPhongMaterial({
+      color: 0xcdbefa,
+      flatShading: true,
+      // wireframe: true
+    }),
+    1: new THREE.MeshPhongMaterial({
+      color: 0xad91ff,
+      flatShading: true,
+      // wireframe: true
+    }),
+    2:new THREE.MeshPhongMaterial({
+      color: 0x926efa,
+      flatShading: true,
+      // wireframe: true
+    }),
+    3:new THREE.MeshPhongMaterial({
+      color: 0x794df7,
+      flatShading: true,
+      // wireframe: true
+    }),
+    4: new THREE.MeshPhongMaterial({
+      color: 0x6632fa,
+      flatShading: true,
+      // wireframe: true
+    })
+  }
 
 const settings = {
   // Make the loop animated
@@ -26,6 +53,26 @@ const settings = {
 let generateMockData = () => {
   return [3,5,1,9,7,10, 5, 8];
 };
+
+let generateMockTitle = () => {
+  return {
+    0: "Total Calls",
+    1: "Answered Calls",
+    2: "Missed Calls",
+    3: "Transferred Calls",
+    4: "Outbound Connected Calls"
+  }
+}
+let generateMockAnalyticsData = () => {
+  return {
+    0: [10, 15, 16, 7, 8, 9, 23],
+    1: [ 2,  3,  1, 2, 1,  2, 4],
+    2: [ 0,  5,  2, 1, 2,  2, 4],
+    3: [ 1,  2,  9, 0, 1,  0, 0],
+    4: [ 4,  0,  0, 5, 3,  3, 5]
+  }
+}
+
 
 let getMax = (data=[]) => {
   return data.reduce((a, b) => { return Math.max(a, b) });
@@ -68,6 +115,8 @@ let drawAxis = (scene, v_max, h_max) => {
   vPoint.add(tempOrigin);
   let hPoint = new THREE.Vector3(h_max * DISTANCE, 0, 0);
   hPoint.add(tempOrigin);
+  // let zPoint = new THREE.Vector3(0, 0, h_max * DISTANCE);
+  // zPoint.add(tempOrigin);
 
 
   const points = [];
@@ -117,16 +166,9 @@ Usage:
 // scene.add(cube);
 ================================
 */
-let createCube = (height=1) => {
+let createCube = (height=1, material=BAR_MATERIAL[0]) => {
   // Setup a geometry
   const geometry = new THREE.BoxGeometry(1, height, 1);
-
-  // Setup a material
-  const material = new THREE.MeshPhongMaterial({
-    color: "pink",
-    flatShading: true,
-    // wireframe: true
-  });
 
   // Setup a mesh with geometry + material
   const mesh = new THREE.Mesh(geometry, material);
@@ -138,15 +180,15 @@ Name: initBarChart
 Params: a list of data
 ======================================
 */
-let initBarChart = (data=[]) => {
+let initBarChart = (data=[], material=BAR_MATERIAL[0]) => {
   if (data.length == 0) {
     return [];
   }
-  const getData = generateMockData();
+  const getData = data;
   const len = getData.length;
   const cubeList = [];
   for (let i = 0; i < len ; i++ ){
-    const cube = createCube(getData[i]);
+    const cube = createCube(getData[i], material);
     cubeList.push(cube);
   }
 
@@ -154,21 +196,31 @@ let initBarChart = (data=[]) => {
 }
 
 
-let drawBarChart = (scene, data=[]) => {
-  const min_data = 1; // We will recalculate this
-  const max_data = getMax(data); // we will recalculate this
-  drawAxis(scene, max_data, data.length);
+let drawBarChart = (scene, data=[], starting_z=0) => {
+  // const min_data = 1; // We will recalculate this
+  // const max_data = getMax(data); // we will recalculate this
+  // drawAxis(scene, max_data, data.length);
 
 
-
-  const cubes = initBarChart(data);
+  const cubes = initBarChart(data, BAR_MATERIAL[starting_z]);
   const startPos = ORIGIN;
   for (let i  = 0; i < cubes.length; i++){
     cubes[i].position.x = startPos.x + DISTANCE * i;
     const h = cubes[i].geometry.parameters.height;
     cubes[i].position.y = h / 2 + 0;
-    cubes[i].position.z = ORIGIN.z;
+    cubes[i].position.z = ORIGIN.z + DISTANCE *  starting_z;
     scene.add(cubes[i]);
+  }
+
+}
+
+let drawMultiBarChart = (scene, data=[]) => {
+  // const min_data = 1; // We will recalculate this
+  // const max_data = 23;//getMax(data); // we will recalculate this
+  // drawAxis(scene, max_data, data.length);
+
+  for(let i = 0; i < 5; i++){
+    drawBarChart(scene, data[i], i)
   }
 
 }
@@ -252,8 +304,10 @@ const sketch = ({ context }) => {
   //================================================
   // Stage 2: Draw a bar chart
   //================================================
-  const data = generateMockData();
-  drawBarChart(scene, data);
+  // const data = generateMockData();
+  // drawBarChart(scene, data);
+  const data = generateMockAnalyticsData();
+  drawMultiBarChart(scene, data);
   
   // Setup Grid
   const gridScale = 10;
@@ -261,7 +315,8 @@ const sketch = ({ context }) => {
 
  
 
-  createText(scene);
+  // Text examples
+  // createText(scene);
 
   
   //===================================================
