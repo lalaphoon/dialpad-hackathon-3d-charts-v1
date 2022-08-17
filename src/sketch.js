@@ -10,7 +10,7 @@ const canvasSketch = require("canvas-sketch");
 
 const DISTANCE = 1.1;
 const ORIGIN = new THREE.Vector3(0, 0, 0);
-const AXIS_DISTANCE = new THREE.Vector3(0, 0, 0);
+const AXIS_DISTANCE = new THREE.Vector3(-1, 0, -1);
 const AXIS_MATERIAL = new THREE.LineBasicMaterial({
   color: 0x000000
 });
@@ -113,13 +113,15 @@ let drawAxis = (scene, v_max, h_max) => {
   
   let vPoint = new THREE.Vector3(0, v_max, 0);
   vPoint.add(tempOrigin);
-  let hPoint = new THREE.Vector3(h_max * DISTANCE, 0, 0);
+  let hPoint = new THREE.Vector3(h_max * DISTANCE + 1, 0, 0);
   hPoint.add(tempOrigin);
   // let zPoint = new THREE.Vector3(0, 0, h_max * DISTANCE);
   // zPoint.add(tempOrigin);
 
 
   const points = [];
+
+
   points.push([tempOrigin, vPoint]);
   points.push([tempOrigin, hPoint]);
 
@@ -130,6 +132,45 @@ let drawAxis = (scene, v_max, h_max) => {
 
 }
 
+
+let drawGridAxis = (scene, v_max, h_max) => {
+  // Shift to left by one
+  let tempOrigin = ORIGIN.clone();
+  tempOrigin.add(AXIS_DISTANCE);
+  const points = [];
+
+  // For Days side
+  for (let i = 0; i <= v_max; i++){
+    let hPoint = new THREE.Vector3(h_max * DISTANCE + 1, i, 0);
+    hPoint.add(tempOrigin);
+    // let zPoint = new THREE.Vector3(0, 0, h_max * DISTANCE);
+    // zPoint.add(tempOrigin);
+    let from = tempOrigin.clone().add(new THREE.Vector3(0, i, 0));
+    points.push([ from, hPoint]);
+  }
+
+  // For Calls Side
+  for (let i = 0; i <= v_max; i++){
+    let hPoint = new THREE.Vector3(0, i, h_max * DISTANCE + 1);
+    hPoint.add(tempOrigin);
+    // let zPoint = new THREE.Vector3(0, 0, h_max * DISTANCE);
+    // zPoint.add(tempOrigin);
+    let from = tempOrigin.clone().add(new THREE.Vector3(0, i, 0));
+    points.push([ from, hPoint]);
+  }
+
+  // For Vertical
+  let vPoint = new THREE.Vector3(0, v_max, 0);
+  vPoint.add(tempOrigin);
+  points.push([tempOrigin, vPoint]);
+
+
+  const lines = createLines(points, AXIS_MATERIAL);
+  for (let i = 0 ; i < lines.length; i++){
+    scene.add(lines[i]);
+  }
+
+}
 
 
 /* =======================
@@ -215,9 +256,9 @@ let drawBarChart = (scene, data=[], starting_z=0) => {
 }
 
 let drawMultiBarChart = (scene, data=[]) => {
-  // const min_data = 1; // We will recalculate this
-  // const max_data = 23;//getMax(data); // we will recalculate this
-  // drawAxis(scene, max_data, data.length);
+  const min_data = 1; // We will recalculate this
+  const max_data = 23;//getMax(data); // we will recalculate this
+  drawGridAxis(scene, max_data, data[0].length);
 
   for(let i = 0; i < 5; i++){
     drawBarChart(scene, data[i], i)
@@ -309,9 +350,9 @@ const sketch = ({ context }) => {
   const data = generateMockAnalyticsData();
   drawMultiBarChart(scene, data);
   
-  // Setup Grid
-  const gridScale = 10;
-  scene.add(new THREE.GridHelper(gridScale, 10, "hsl(0, 0%, 50%)", "hsl(0, 0%, 70%)"));
+  // // Setup Grid
+  // const gridScale = 10;
+  // scene.add(new THREE.GridHelper(gridScale, 10, "hsl(0, 0%, 50%)", "hsl(0, 0%, 70%)"));
 
  
 
