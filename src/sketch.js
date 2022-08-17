@@ -3,12 +3,16 @@ global.THREE = require("three");
 
 // Include any additional ThreeJS examples below
 require("three/examples/js/controls/OrbitControls");
+require("three/examples/js/loaders/FontLoader");
+require("three/examples/js/geometries/TextGeometry");
 
 const canvasSketch = require("canvas-sketch");
+
 const DISTANCE = 2;
 const ORIGIN = new THREE.Vector3(0, 0, 0);
+const AXIS_DISTANCE = new THREE.Vector3(0, 0, 0);
 const AXIS_MATERIAL = new THREE.LineBasicMaterial({
-  color: 0x0000ff
+  color: 0x19e6e6
 });
 
 const settings = {
@@ -20,7 +24,7 @@ const settings = {
 
 // Fake data
 let generateMockData = () => {
-  return [3,5,1,9,7];
+  return [3,5,1,9,7,10, 5, 8];
 };
 
 let getMax = (data=[]) => {
@@ -58,7 +62,7 @@ let drawAxis = (scene, v_max, h_max) => {
   
   // Shift to left by one
   let tempOrigin = ORIGIN.clone();
-  tempOrigin.add(new THREE.Vector3(-1, 0, 0))
+  tempOrigin.add(AXIS_DISTANCE);
   
   let vPoint = new THREE.Vector3(0, v_max, 0);
   vPoint.add(tempOrigin);
@@ -119,8 +123,8 @@ let createCube = (height=1) => {
 
   // Setup a material
   const material = new THREE.MeshBasicMaterial({
-    color: "pink",
-    wireframe: true
+    color: "pink"
+    // wireframe: true
   });
 
   // Setup a mesh with geometry + material
@@ -168,6 +172,36 @@ let drawBarChart = (scene, data=[]) => {
 
 }
 
+/* =============================
+// Create Text
+================================
+*/
+
+let createText = (scene) => {
+  const loader = new THREE.FontLoader();
+  loader.load( 'node_modules/three/examples/fonts/helvetiker_bold.typeface.json', function ( font ) {
+    const geometry = new THREE.TextGeometry( 'o', {
+        font: font,
+        size: 1,
+        height: 1,
+        // curveSegments: 12,
+        // bevelEnabled: true,
+        // bevelThickness: 2,
+        // bevelSize: 2,
+        // bevelOffset: 0,
+        // bevelSegments: 5
+      } );
+    
+      var textMaterial = new THREE.MeshPhongMaterial( { color: 0x049ef4 } );
+
+      var mesh = new THREE.Mesh( geometry, textMaterial );
+      mesh.position.set( 0, 0, 4 );
+    
+      scene.add(mesh);
+    
+  });
+}
+
 
 const sketch = ({ context }) => {
   //================================================
@@ -197,7 +231,8 @@ const sketch = ({ context }) => {
   scene.add( axesHelper );
 
 
-
+  const light = new THREE.AmbientLight( 0x404040, 6 ); // soft white light
+  scene.add( light );
 
 
   //================================================
@@ -210,9 +245,12 @@ const sketch = ({ context }) => {
   const gridScale = 10;
   scene.add(new THREE.GridHelper(gridScale, 10, "hsl(0, 0%, 50%)", "hsl(0, 0%, 70%)"));
 
+ 
   
-  
-  
+
+
+ createText(scene);
+
   
   
   
