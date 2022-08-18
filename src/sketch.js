@@ -25,6 +25,7 @@ const LINE_CHART_MATERIAL = new THREE.LineBasicMaterial({
 });
 const CUBES = [];
 const TEXTS = [];
+const CENTER_LINES = [];
 
 const BAR_MATERIAL = {
     0: new THREE.MeshPhongMaterial({
@@ -343,6 +344,22 @@ let drawMultiLineChart = (scene, data=[]) => {
 
 }
 
+let drawCenterLine = (scene, data, index=0) => {
+  let pos = indexConverter(index);
+  const startPos = ORIGIN;
+  let x = startPos.x + DISTANCE * pos[1];
+  let y = data[pos[0]][pos[1]];
+  let z = startPos.z + DISTANCE * pos[0];
+  let posVec = new THREE.Vector3(x, y, z);
+  let line1 = [posVec, new THREE.Vector3(x, y, AXIS_DISTANCE.z)];
+  let line2 = [posVec, new THREE.Vector3(AXIS_DISTANCE.x, y, z)];
+  let lines = createLines([line1, line2], AXIS_MATERIAL);
+  for (let i = 0 ; i < lines.length; i++){
+    CENTER_LINES.push(lines[i])
+    scene.add(lines[i]);
+  }
+}
+
 
 
 
@@ -499,6 +516,11 @@ const sketch = ({ context, canvas, width, height }) => {
 
 
   drawMultiBarChart(scene, data);
+
+
+
+
+  drawCenterLine(scene, data, 0);
   
 
  
@@ -519,9 +541,25 @@ const sketch = ({ context, canvas, width, height }) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
   gui.add(OPTIONS, "selection", 0, 34, 1).onChange((val) => {
     reset();
     cubeSelected(val);
+
+    for(let i = 0; i < CENTER_LINES.length; i++) {
+      CENTER_LINES[i].removeFromParent();
+    }
+    drawCenterLine(scene, data, val)
 
 
     changeText(scene, val);
