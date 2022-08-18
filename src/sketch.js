@@ -344,6 +344,30 @@ let createText = (scene, text=[]) => {
 }
 
 
+
+let createDailpadText = (scene) => {
+  const loader = new THREE.FontLoader();
+  const startingPos = new THREE.Vector3(-10 ,-5, 15);
+  loader.load( 'node_modules/three/examples/fonts/helvetiker_bold.typeface.json', function ( font ) {  
+        const geometry = new THREE.TextGeometry( "2022 BUILD <DIFFERENT>", {
+          font: font,
+          size: 2,
+          height: 1,
+        } );
+      
+        var textMaterial = new THREE.MeshPhongMaterial( { color: 0x8d52fa } );
+  
+        var mesh = new THREE.Mesh( geometry, textMaterial );
+        mesh.position.set( startingPos.x, startingPos.y, startingPos.z );
+        scene.add(mesh);
+    
+  });
+}
+
+
+
+
+
 /*
 ==================================================
 Gui Operations
@@ -440,6 +464,7 @@ const sketch = ({ context, canvas, width, height }) => {
 
   //Text examples
   createText(scene, ["-", "-", "-"]);
+  createDailpadText(scene);
 
 
 
