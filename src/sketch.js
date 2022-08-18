@@ -19,6 +19,10 @@ const AXIS_DISTANCE = new THREE.Vector3(-0.5, 0, -0.5);
 const AXIS_MATERIAL = new THREE.LineBasicMaterial({
   color: 0x000000
 });
+const LINE_CHART_MATERIAL = new THREE.LineBasicMaterial({
+  color: 0x8d52fa,
+  linewidth: 10
+});
 const CUBES = [];
 const TEXTS = [];
 
@@ -306,6 +310,32 @@ let drawMultiBarChart = (scene, data=[]) => {
 
 }
 
+/* ==================================
+Name: initLineChart
+Params: a list of data
+======================================
+*/
+let drawLineChart = (scene, data=[], starting_z=0) => {
+  let points = [];
+  const startPos = ORIGIN;
+  for (let i = 0; i < data.length; i++) {
+    let pos = new THREE.Vector3(startPos.x + DISTANCE * i, data[i], ORIGIN.z + DISTANCE *  starting_z);
+    points.push(pos.clone());
+  }
+  const line = createSingleLine(points, LINE_CHART_MATERIAL);
+  scene.add(line);
+}
+
+let drawMultiLineChart = (scene, data=[]) => {
+  for(let i = 0; i < 5; i++){
+    drawLineChart(scene, data[i], i)
+  }
+
+}
+
+
+
+
 /* =============================
 // Create Text
 ================================
@@ -451,21 +481,25 @@ const sketch = ({ context, canvas, width, height }) => {
   //================================================
   // Stage 2: Draw a bar chart
   //================================================
-  // const data = generateMockData();
-  // drawBarChart(scene, data);
   const data = generateMockAnalyticsData();
   drawMultiBarChart(scene, data);
   
-  // // Setup Grid
-  // const gridScale = 10;
-  // scene.add(new THREE.GridHelper(gridScale, 10, "hsl(0, 0%, 50%)", "hsl(0, 0%, 70%)"));
 
  
 
+
+  //==================================================
+  // Stage 2.1: legends
+  //==================================================
   //Text examples
   createText(scene, ["-", "-", "-"]);
   createDailpadText(scene);
 
+
+  //==================================================
+  // Stage 3: Draw a line chart
+  //==================================================
+  drawMultiLineChart(scene, data);
 
 
 
