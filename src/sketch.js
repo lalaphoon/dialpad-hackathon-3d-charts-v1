@@ -15,7 +15,7 @@ const OPTIONS = {
 
 const DISTANCE = 1.1;
 const ORIGIN = new THREE.Vector3(0, 0, 0);
-const AXIS_DISTANCE = new THREE.Vector3(-1, 0, -1);
+const AXIS_DISTANCE = new THREE.Vector3(-0.5, 0, -0.5);
 const AXIS_MATERIAL = new THREE.LineBasicMaterial({
   color: 0x000000
 });
@@ -144,6 +144,30 @@ let drawAxis = (scene, v_max, h_max) => {
 
 }
 
+let addUnit = (scene, v_max ,h_max) => {
+  const loader = new THREE.FontLoader();
+  const startingPos = new THREE.Vector3(h_max * DISTANCE + 1 ,0, 0);
+  loader.load( 'node_modules/three/examples/fonts/helvetiker_bold.typeface.json', function ( font ) {
+      
+      for (let i = 0; i <= v_max; i++){
+        const geometry = new THREE.TextGeometry( String(i), {
+          font: font,
+          size: 0.5,
+          height: 0.01
+        } );
+      
+        var textMaterial = new THREE.MeshPhongMaterial( { color: 0x1e2121 } );
+  
+        var mesh = new THREE.Mesh( geometry, textMaterial );
+        mesh.position.set( startingPos.x, startingPos.y, startingPos.z );
+        scene.add(mesh);
+        startingPos.add(new THREE.Vector3(0,1,0));
+        
+      }
+    
+  });
+}
+
 
 let drawGridAxis = (scene, v_max, h_max) => {
   // Shift to left by one
@@ -175,6 +199,9 @@ let drawGridAxis = (scene, v_max, h_max) => {
   let vPoint = new THREE.Vector3(0, v_max, 0);
   vPoint.add(tempOrigin);
   points.push([tempOrigin, vPoint]);
+
+  // Add text vertically
+  addUnit(scene, v_max, h_max);
 
 
   const lines = createLines(points, AXIS_MATERIAL);
@@ -303,7 +330,7 @@ let createText = (scene, text=[]) => {
           // bevelSegments: 5
         } );
       
-        var textMaterial = new THREE.MeshPhongMaterial( { color: 0x049ef4 } );
+        var textMaterial = new THREE.MeshPhongMaterial( { color: 0x1e2121 } );
   
         var mesh = new THREE.Mesh( geometry, textMaterial );
         mesh.position.set( startingPos.x, startingPos.y, startingPos.z );
@@ -342,7 +369,7 @@ const changeText = (scene, index) => {
     for(let i = 0; i < TEXTS.length; i++){
       TEXTS[i].removeFromParent();
     }
-    let day = "Day " + String(pos[1]);
+    let day = "Day " + String(pos[1] + 1);
     createText(scene,  [day, generateMockTitle()[pos[0]], String(generateMockAnalyticsData()[pos[0]][pos[1]])]);
 }
 
