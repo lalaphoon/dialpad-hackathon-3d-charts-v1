@@ -106,6 +106,20 @@ let createSingleLine = (points=[], material) => {
   return line
 }
 
+let createSingleThickLine = (points=[], material) => {
+  var tubeGeometry = new THREE.TubeGeometry(
+    new THREE.CatmullRomCurve3(points),
+    512,// path segments
+    0.05,// THICKNESS
+    4, //Roundness of Tube
+    false //closed
+  );
+
+  let line = new THREE.Line(tubeGeometry, material);
+  return line;
+}
+
+
 /* ============================
 Name: createLines
 Params: [[Vector3]], take a list of list of Vec3
@@ -300,10 +314,6 @@ let drawBarChart = (scene, data=[], starting_z=0) => {
 }
 
 let drawMultiBarChart = (scene, data=[]) => {
-  const min_data = 1; // We will recalculate this
-  const max_data = getMax(data[0]); // we will recalculate this
-  drawGridAxis(scene, max_data, data[0].length);
-
   for(let i = 0; i < 5; i++){
     drawBarChart(scene, data[i], i)
   }
@@ -322,7 +332,7 @@ let drawLineChart = (scene, data=[], starting_z=0) => {
     let pos = new THREE.Vector3(startPos.x + DISTANCE * i, data[i], ORIGIN.z + DISTANCE *  starting_z);
     points.push(pos.clone());
   }
-  const line = createSingleLine(points, LINE_CHART_MATERIAL);
+  const line = createSingleThickLine(points, LINE_CHART_MATERIAL);
   scene.add(line);
 }
 
@@ -461,8 +471,8 @@ const sketch = ({ context, canvas, width, height }) => {
   const scene = new THREE.Scene();
 
   // Setup axes helpers
-  const axesHelper = new THREE.AxesHelper( 5 );
-  scene.add( axesHelper );
+  // const axesHelper = new THREE.AxesHelper( 5 );
+  // scene.add( axesHelper );
 
 
   //================================================
@@ -482,6 +492,12 @@ const sketch = ({ context, canvas, width, height }) => {
   // Stage 2: Draw a bar chart
   //================================================
   const data = generateMockAnalyticsData();
+  const min_data = 1; // We will recalculate this
+  const max_data = getMax(data[0]); // we will recalculate this
+  drawGridAxis(scene, max_data, data[0].length);
+
+
+
   drawMultiBarChart(scene, data);
   
 
