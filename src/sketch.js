@@ -8,12 +8,20 @@ require("three/examples/js/geometries/TextGeometry");
 
 const canvasSketch = require("canvas-sketch");
 
+const { GUI } = require("dat.gui");
+const OPTIONS = {
+  selection: 0
+};
+
 const DISTANCE = 1.1;
 const ORIGIN = new THREE.Vector3(0, 0, 0);
 const AXIS_DISTANCE = new THREE.Vector3(-1, 0, -1);
 const AXIS_MATERIAL = new THREE.LineBasicMaterial({
   color: 0x000000
 });
+const CUBES = [];
+const TEXTS = [];
+
 const BAR_MATERIAL = {
     0: new THREE.MeshPhongMaterial({
       color: 0xcdbefa,
@@ -71,6 +79,10 @@ let generateMockAnalyticsData = () => {
     3: [ 1,  2,  9, 0, 1,  0, 0],
     4: [ 4,  0,  0, 5, 3,  3, 5]
   }
+}
+
+let indexConverter = (index) => {
+  return [Math.floor(index / 7), index % 7];
 }
 
 
@@ -250,6 +262,7 @@ let drawBarChart = (scene, data=[], starting_z=0) => {
     const h = cubes[i].geometry.parameters.height;
     cubes[i].position.y = h / 2 + 0;
     cubes[i].position.z = ORIGIN.z + DISTANCE *  starting_z;
+    CUBES.push(cubes[i]);
     scene.add(cubes[i]);
   }
 
@@ -271,37 +284,72 @@ let drawMultiBarChart = (scene, data=[]) => {
 ================================
 */
 
-let createText = (scene) => {
+let createText = (scene, text=[]) => {
   const loader = new THREE.FontLoader();
+  const startingPos = new THREE.Vector3(6 ,0, 7);
   loader.load( 'node_modules/three/examples/fonts/helvetiker_bold.typeface.json', function ( font ) {
-    const geometry = new THREE.TextGeometry( 'Monica', {
-        font: font,
-        size: 1,
-        height: 1,
-        // curveSegments: 12,
-        // bevelEnabled: true,
-        // bevelThickness: 2,
-        // bevelSize: 2,
-        // bevelOffset: 0,
-        // bevelSegments: 5
-      } );
-    
-      var textMaterial = new THREE.MeshPhongMaterial( { color: 0x049ef4 } );
-
-      var mesh = new THREE.Mesh( geometry, textMaterial );
-      mesh.position.set( 0, 0, 4 );
-
-      var mesh2 = new THREE.Mesh( geometry, textMaterial );
-      mesh2.position.set( 0, 0, 8 );
-    
-      scene.add(mesh);
-      scene.add(mesh2);
+      
+      for (let i = 0; i < text.length; i++){
+        const geometry = new THREE.TextGeometry( text[i], {
+          font: font,
+          size: 0.5,
+          height: 0.01,
+          
+          // curveSegments: 2,
+          // bevelEnabled: true,
+          // bevelThickness: 0.1,
+          // bevelSize: 2,
+          // bevelOffset: 0,
+          // bevelSegments: 5
+        } );
+      
+        var textMaterial = new THREE.MeshPhongMaterial( { color: 0x049ef4 } );
+  
+        var mesh = new THREE.Mesh( geometry, textMaterial );
+        mesh.position.set( startingPos.x, startingPos.y, startingPos.z );
+        scene.add(mesh);
+        TEXTS.push(mesh);
+        startingPos.add(new THREE.Vector3(0,0,1));
+        
+      }
     
   });
 }
 
 
-const sketch = ({ context }) => {
+/*
+==================================================
+Gui Operations
+==================================================
+*/
+const reset = () => {
+    for (let i = 0; i < CUBES.length; i++){
+      let pos = indexConverter(i);
+      CUBES[i].material = BAR_MATERIAL[Math.floor(pos[0])];
+
+    }
+}
+const cubeSelected = (index) => {
+  CUBES[index].material = new THREE.MeshPhongMaterial({
+    color: 0x2ae7f5,
+    flatShading: true,
+    // wireframe: true
+  })
+}
+
+const changeText = (scene, index) => {
+  let pos = indexConverter(index);
+    for(let i = 0; i < TEXTS.length; i++){
+      TEXTS[i].removeFromParent();
+    }
+    let day = "Day " + String(pos[1]);
+    createText(scene,  [day, generateMockTitle()[pos[0]], String(generateMockAnalyticsData()[pos[0]][pos[1]])]);
+}
+
+
+
+
+const sketch = ({ context, canvas, width, height }) => {
   //================================================
   // Stage 1: Set up scene and camera
   //================================================
@@ -309,6 +357,13 @@ const sketch = ({ context }) => {
   const renderer = new THREE.WebGLRenderer({
     canvas: context.canvas
   });
+
+  const gui = new GUI();
+
+
+
+
+
 
   // WebGL background color
   renderer.setClearColor("#fff", 1);
@@ -356,8 +411,22 @@ const sketch = ({ context }) => {
 
  
 
-  // Text examples
-  // createText(scene);
+  //Text examples
+  createText(scene, ["-", "-", "-"]);
+
+
+
+
+  gui.add(OPTIONS, "selection", 0, 34, 1).onChange((val) => {
+    reset();
+    cubeSelected(val);
+
+
+    changeText(scene, val);
+
+
+
+  });
 
   
   //===================================================
@@ -380,6 +449,7 @@ const sketch = ({ context }) => {
     unload() {
       controls.dispose();
       renderer.dispose();
+      gui.destroy();
     }
   };
 };
