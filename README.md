@@ -16,3 +16,6 @@ $ canvas-sketch src/sketch.js --new --template=three
 ```
 
 # Step 3 - Run the server again
+```
+$ canvas-sketch src/sketch.js
+```
